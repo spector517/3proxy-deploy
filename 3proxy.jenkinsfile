@@ -144,12 +144,13 @@ pipeline {
             steps {
                 echo 'Running ansible playbook...'
                 sh 'ansible-galaxy install spector517.proxy3'
-                ansiblePlaybook(
-                    playbook: 'playbook.yml',
-                    inventory: 'inventory.txt',
-                    hostKeyChecking: false,
-                    extras: "-e @vars.yml ${if (params.CHECK) '--check' else ''}"
-                )
+                withEnv(['ANSIBLE_HOST_KEY_CHECKING=False']) {
+                    ansiblePlaybook(
+                        playbook: 'playbook.yml',
+                        inventory: 'inventory.txt',
+                        extras: "-e @vars.yml ${if (params.CHECK) '--check' else ''}"
+                    )
+                }
                 echo 'Playbook executed successfully!'
             }
         }
