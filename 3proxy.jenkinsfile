@@ -134,7 +134,7 @@ pipeline {
                 script {
                     def playbook = "- hosts: all\n" +
                         "  roles:\n" +
-                        "  - role: spector517.3proxy"
+                        "  - role: spector517.proxy3"
                     writeFile file: 'playbook.yml', text: playbook
                     sh 'cat playbook.yml'
                 }
@@ -143,7 +143,7 @@ pipeline {
         stage('Deploy 3Proxy server') {
             steps {
                 echo 'Running ansible playbook...'
-                echo 'ansible-galaxy install spector517.3proxy'
+                echo 'ansible-galaxy install spector517.proxy3'
                 ansiblePlaybook(
                     playbook: 'playbook.yml',
                     inventory: 'inventory.txt',
