@@ -148,7 +148,7 @@ pipeline {
                     ansiblePlaybook(
                         playbook: 'playbook.yml',
                         inventory: 'inventory.txt',
-                        extras: "-e @vars.yml ${if (params.CHECK) '--check' else ''}"
+                        extras: "-e @vars.yml ${if (params.CHECK_MODE) '--check' else ''}"
                     )
                 }
                 echo 'Playbook executed successfully!'
