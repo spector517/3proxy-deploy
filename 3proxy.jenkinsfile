@@ -111,7 +111,7 @@ pipeline {
                         proxy3_socks_port: params.SOCKS_PORT,
                         proxy3_system_group_id: params.SYSTEM_GROUP_ID,
                         proxy3_system_user_id: params.SYSTEM_USER_ID,
-                        proxy3_dns: params.DNS.split(','),
+                        proxy3_dns: "$params.DNS".split(','),
                         proxy3_use_ufw: params.USE_UFW,
                         proxy3_clients: clients,
                     ]
@@ -147,7 +147,7 @@ pipeline {
                     playbook: 'playbook.yml',
                     inventory: 'inventory.txt',
                     hostKeyChecking: false,
-                    extras: "-e @vars.yml ${if (params.CHECK) '--check'}"
+                    extras: "-e @vars.yml ${if (params.CHECK) '--check' else ''}"
                 )
                 echo 'Playbook executed successfully!'
             }
@@ -168,7 +168,7 @@ pipeline {
                     echo '[HTTP-proxy] Test...'
                     def response = sh(
                         script: """curl -x '$REMOTE_SERVER:$HTTP_PORT' \
-                            ${if (client) "-U '$client'"} \
+                            ${if (client) "-U '$client'" else ''} \
                             'https://api64.ipify.org'
                         """,
                         returnStdout: true
@@ -184,7 +184,7 @@ pipeline {
                     echo '[SOCKSv5-proxy] Test...'
                     response = sh(
                         script: """curl --socks5 '$REMOTE_SERVER:$SOCKS_PORT' \
-                            ${if (client) "-U '$client'"} \
+                            ${if (client) "-U '$client'" else ''} \
                             'https://api64.ipify.org'
                         """,
                         returnStdout: true
