@@ -143,6 +143,7 @@ pipeline {
         stage('Deploy 3Proxy server') {
             steps {
                 echo 'Running ansible playbook...'
+                echo 'ansible-galaxy install spector517.3proxy'
                 ansiblePlaybook(
                     playbook: 'playbook.yml',
                     inventory: 'inventory.txt',
