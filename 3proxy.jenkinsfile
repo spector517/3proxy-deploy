@@ -180,7 +180,7 @@ pipeline {
                     } else {
                         echo "Response IP '$response' not equal remote server IP '$remoteServerIp'"
                         echo '[HTTP-proxy] Test failed!'
-                        currentBuild.status = 'UNSTABLE'
+                        currentBuild.result = 'UNSTABLE'
                     }
 
                     echo '[SOCKSv5-proxy] Test...'
@@ -196,10 +196,10 @@ pipeline {
                     } else {
                         echo "Response IP '$response' not equal remote server IP '$remoteServerIp'"
                         echo '[SOCKSv5-proxy] Test failed!'
-                        currentBuild.status = 'UNSTABLE'
+                        currentBuild.result = 'UNSTABLE'
                     }
 
-                    if (currentBuild.status != 'UNSTABLE') {
+                    if (currentBuild.result != 'UNSTABLE') {
                         echo 'All tests passed!'
                     }
                 }
