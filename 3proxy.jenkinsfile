@@ -1,0 +1,207 @@
+pipeline {
+    agent any
+    parameters {
+        string(
+            name: 'REMOTE_SERVER',
+            description: "Target server for deploy '3Proxy'"
+        )
+        string(
+            name: 'REMOTE_SERVER_PORT',
+            defaultValue: '22',
+            description: "Target server's ssh port"
+        )
+        string(
+            name: 'REMOTE_USER',
+            description: "Target server's root user"
+        )
+        password(
+            name: 'REMOTE_PASSWORD',
+            description: "Target server's root password"
+        )
+        booleanParam(
+            name: 'CHECK_MODE',
+            defaultValue: false,
+            description: "Run ansible playbook dry run"
+        )
+        string(
+            name: 'VERSION', 
+            defaultValue: '0.9.4',
+            description: "Distrib version of the '3Proxy' proxy server"
+        )
+        string(
+            name: 'HTTP_PORT',
+            defaultValue: '3128',
+            description: "HTTP-proxy port number of '3Proxy'"
+        )
+        string(
+            name: 'SOCKS_PORT',
+            defaultValue: '1080',
+            description: "SOCKSv4/SOCKSv5 port number of '3Proxy'"
+        )
+        string(
+            name: 'SYSTEM_GROUP_ID',
+            defaultValue: '200',
+            description: "System group id on remotes"
+        )
+        string(
+            name: 'SYSTEM_USER_ID',
+            defaultValue: '201',
+            description: "System user id on remotes"
+        )
+        string(
+            name: 'DNS',
+            defaultValue: '1.1.1.1',
+            description: "Comma separated list of DNS used by '3Proxy'"
+        )
+        booleanParam(
+            name: 'USE_UFW',
+            defaultValue: true,
+            description: "Use the Uncomplicated Firewall (or you may use other firewall)"
+        )
+        string(
+            name: 'CLIENTS',
+            description: "Comma separated list of clients '3Proxy' server. For example, 'user1:pass1,user2:pass2'." +
+                " Allow all connections if empty"
+        )
+    }
+    stages {
+        stage('Initialization') {
+            steps {
+                cleanWs()
+                echo 'Pipeline running with next parameters:'
+                script {
+                    paramsString = ''
+                    params.each { key, value ->
+                        paramsString += "\t$key: $value\n"
+                    }
+                    echo paramsString
+                }
+                echo '---------------------------------------'
+                echo 'Check parameters...'
+                script {
+                    if (!params.REMOTE_SERVER) {
+                        error("Pipeline parameter 'REMOTE_SERVER' are required!")
+                    }
+                    if (!params.REMOTE_USER) {
+                        error("Pipeline parameter 'REMOTE_USER' are required!")
+                    }
+                    if (!params.REMOTE_PASSWORD) {
+                        error("Pipeline parameter 'REMOTE_PASSWORD' are required!")
+                    }
+                }
+                echo 'Parameters checked!'
+            }
+        }
+        stage('Generate ansible files') {
+            steps {
+                echo 'Generating vars file...'
+                script {
+                    def clients = []
+                    if (params.CLIENTS) {
+                        params.CLIENTS.split(',').each { client ->
+                            clients << [
+                                name: client.split(':')[0],
+                                password: client.split(':')[1]
+                            ]
+                        }
+                    }
+                    def vars = [
+                        proxy3_version: params.VERSION,
+                        proxy3_http_port: params.HTTP_PORT,
+                        proxy3_socks_port: params.SOCKS_PORT,
+                        proxy3_system_group_id: params.SYSTEM_GROUP_ID,
+                        proxy3_system_user_id: params.SYSTEM_USER_ID,
+                        proxy3_dns: params.DNS.split(','),
+                        proxy3_use_ufw: params.USE_UFW,
+                        proxy3_clients: clients,
+                    ]
+                    writeYaml file: 'vars.yml', data: vars
+                    sh 'cat vars.yml'
+                }
+                echo 'Vars file generated successfully!'
+
+                echo 'Generating inventory file...'
+                script {
+                    def inventory = "$params.REMOTE_SERVER" +
+                        " ansible_user=$params.REMOTE_USER" +
+                        " ansible_password=$params.REMOTE_PASSWORD"
+                    writeFile file: 'inventory.txt', text: inventory
+                    sh 'cat inventory.txt'
+                }
+                echo 'Inventory file generated successfully!'
+
+                echo 'Generating playbook...'
+                script {
+                    def playbook = "- hosts: all\n" +
+                        "  roles:\n" +
+                        "  - role: spector517.3proxy"
+                    writeFile file: 'playbook.yml', text: playbook
+                    sh 'cat playbook.yml'
+                }
+            }
+        }
+        stage('Deploy 3Proxy server') {
+            steps {
+                echo 'Running ansible playbook...'
+                ansiblePlaybook(
+                    playbook: 'playbook.yml',
+                    inventory: 'inventory.txt',
+                    hostKeyChecking: false,
+                    extras: "-e @vars.yml ${if (params.CHECK) '--check'}"
+                )
+                echo 'Playbook executed successfully!'
+            }
+        }
+        stage('Tests') {
+            steps {
+                echo 'Running tests...'
+                script {
+                    def remoteServerIp = (
+                        sh(
+                            script: "ping $REMOTE_SERVER -c 4",
+                            returnStdout: true
+                        ) =~ /(?<=\()[0-9\.]+(?!=\))/
+                    )[0]
+                    def client = params.CLIENTS.split(',')[0]
+                    echo "Remote server IP: $remoteServerIp"
+
+                    echo '[HTTP-proxy] Test...'
+                    def response = sh(
+                        script: """curl -x '$REMOTE_SERVER:$HTTP_PORT' \
+                            ${if (client) "-U '$client'"} \
+                            'https://api64.ipify.org'
+                        """,
+                        returnStdout: true
+                    ).trim()
+                    if (response == remoteServerIp) {
+                        echo '[HTTP-proxy] Test passed!'
+                    } else {
+                        echo "Response IP '$response' not equal remote server IP '$remoteServerIp'"
+                        echo '[HTTP-proxy] Test failed!'
+                        currentBuild.status = 'UNSTABLE'
+                    }
+
+                    echo '[SOCKSv5-proxy] Test...'
+                    response = sh(
+                        script: """curl --socks5 '$REMOTE_SERVER:$SOCKS_PORT' \
+                            ${if (client) "-U '$client'"} \
+                            'https://api64.ipify.org'
+                        """,
+                        returnStdout: true
+                    ).trim()
+                    if (response == remoteServerIp) {
+                        echo '[SOCKSv5-proxy] Test passed!'
+                    } else {
+                        echo "Response IP '$response' not equal remote server IP '$remoteServerIp'"
+                        echo '[SOCKSv5-proxy] Test failed!'
+                        currentBuild.status = 'UNSTABLE'
+                    }
+
+                    if (currentBuild.status != 'UNSTABLE') {
+                        echo 'All tests passed!'
+                    }
+                }
+            }
+        }
+    }
+}
