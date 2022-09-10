@@ -111,7 +111,7 @@ pipeline {
                         proxy3_socks_port: params.SOCKS_PORT,
                         proxy3_system_group_id: params.SYSTEM_GROUP_ID,
                         proxy3_system_user_id: params.SYSTEM_USER_ID,
-                        proxy3_dns: $params.DNS.split(',') as List,
+                        proxy3_dns: params.DNS.split(',') as List,
                         proxy3_use_ufw: params.USE_UFW,
                         proxy3_clients: clients,
                     ]
