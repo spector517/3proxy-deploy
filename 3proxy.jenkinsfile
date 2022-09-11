@@ -79,7 +79,7 @@ pipeline {
                 echo '---------------------------------------'
                 echo 'Check parameters...'
                 script {
-                    if (env.BUILD_NUMBER == 1) {
+                    if (env.BUILD_NUMBER.toInteger() == 1) {
                         echo "First time build. Pipeline initialized. Rebuild pipeline with parameters."
                         return
                     }
@@ -146,7 +146,7 @@ pipeline {
             }
             when {
                 expression {
-                    return env.BUILD_NUMBER > 1
+                    return env.BUILD_NUMBER.toInteger() > 1
                 }
             }
         }
@@ -165,7 +165,7 @@ pipeline {
             }
             when {
                 expression {
-                    return env.BUILD_NUMBER > 1
+                    return env.BUILD_NUMBER.toInteger() > 1
                 }
             }
         }
@@ -217,7 +217,7 @@ pipeline {
             }
             when {
                 expression {
-                    return env.BUILD_NUMBER > 1
+                    return env.BUILD_NUMBER.toInteger() > 1
                 }
             }
         }
