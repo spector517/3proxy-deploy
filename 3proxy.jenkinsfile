@@ -79,6 +79,10 @@ pipeline {
                 echo '---------------------------------------'
                 echo 'Check parameters...'
                 script {
+                    if (env.BUILD_NUMBER == 1) {
+                        echo "First time build. Pipeline initialized. Rebuild pipeline with parameters."
+                        return
+                    }
                     if (!params.REMOTE_SERVER) {
                         error("Pipeline parameter 'REMOTE_SERVER' are required!")
                     }
@@ -140,6 +144,11 @@ pipeline {
                 }
                 echo 'Playbook generated successfully!'
             }
+            when {
+                expression {
+                    return env.BUILD_NUMBER > 1
+                }
+            }
         }
         stage('Deploy 3Proxy server') {
             steps {
@@ -153,6 +162,11 @@ pipeline {
                     )
                 }
                 echo 'Playbook executed successfully!'
+            }
+            when {
+                expression {
+                    return env.BUILD_NUMBER > 1
+                }
             }
         }
         stage('Run tests') {
@@ -205,6 +219,10 @@ pipeline {
                     if (currentBuild.result != 'UNSTABLE') {
                         echo 'All tests passed!'
                     }
+            }
+            when {
+                expression {
+                    return env.BUILD_NUMBER > 1
                 }
             }
         }
