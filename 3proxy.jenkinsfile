@@ -138,6 +138,7 @@ pipeline {
                     writeFile file: 'playbook.yml', text: playbook
                     sh 'cat playbook.yml'
                 }
+                echo 'Playbook generated successfully!'
             }
         }
         stage('Deploy 3Proxy server') {
