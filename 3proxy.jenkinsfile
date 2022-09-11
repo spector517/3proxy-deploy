@@ -168,6 +168,7 @@ pipeline {
                     def client = params.CLIENTS.split(',')[0]
                     echo "Remote server IP: $remoteServerIp"
 
+                    // Run HTTP-proxy test
                     echo '[HTTP-proxy] Test...'
                     def response = sh(
                         script: """curl -x '$REMOTE_SERVER:$HTTP_PORT' \
@@ -184,6 +185,7 @@ pipeline {
                         currentBuild.result = 'UNSTABLE'
                     }
 
+                    // Run SOCKSv5-proxy test
                     echo '[SOCKSv5-proxy] Test...'
                     response = sh(
                         script: """curl --socks5 '$REMOTE_SERVER:$SOCKS_PORT' \
