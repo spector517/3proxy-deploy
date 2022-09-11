@@ -155,7 +155,7 @@ pipeline {
                 echo 'Playbook executed successfully!'
             }
         }
-        stage('Tests') {
+        stage('Run tests') {
             steps {
                 echo 'Running tests...'
                 script {
