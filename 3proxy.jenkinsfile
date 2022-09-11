@@ -3,7 +3,7 @@ pipeline {
     parameters {
         string(
             name: 'REMOTE_SERVER',
-            description: "Target server for deploy '3Proxy'"
+            description: "Target server for deploy '3Proxy' (DNS or IPv4)"
         )
         string(
             name: 'REMOTE_SERVER_PORT',
