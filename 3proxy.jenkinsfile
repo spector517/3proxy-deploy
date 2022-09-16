@@ -84,13 +84,16 @@ pipeline {
                         return
                     }
                     if (!params.REMOTE_SERVER) {
-                        error("Pipeline parameter 'REMOTE_SERVER' are required!")
+                        error("Required pipeline parameter 'REMOTE_SERVER' is empty!")
                     }
                     if (!params.REMOTE_USER) {
-                        error("Pipeline parameter 'REMOTE_USER' are required!")
+                        error("Required pipeline parameter 'REMOTE_USER' is empty!")
                     }
                     if (!params.REMOTE_PASSWORD) {
-                        error("Pipeline parameter 'REMOTE_PASSWORD' are required!")
+                        error("Required pipeline parameter 'REMOTE_PASSWORD' is empty!")
+                    }
+                    if (params.CLIENT && (params.CLIENT ==~ /(\w+:\w+,?)+/)) {
+                        error("Required pipeline parameter 'CLIENTS' is empty or incorrect")
                     }
                 }
                 echo 'Parameters checked!'
