@@ -92,7 +92,7 @@ pipeline {
                     if (!params.REMOTE_PASSWORD) {
                         error("Required pipeline parameter 'REMOTE_PASSWORD' is empty!")
                     }
-                    if (!params.CLIENT && !(params.CLIENT ==~ /^(\w+:\w+,?)+$/)) {
+                    if (!params.CLIENTS && !(params.CLIENTS ==~ /^(\w+:\w+,?)+$/)) {
                         error("Required pipeline parameter 'CLIENTS' is empty or incorrect")
                     }
                 }
