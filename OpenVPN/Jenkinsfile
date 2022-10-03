@@ -60,8 +60,8 @@ pipeline {
                     }
                     echo paramsString
                     if (params.CHECK_MODE) {
-                        echo '=====================================' +
-                            '             CHECK MODE' +
+                        echo '=====================================\n' +
+                            '             CHECK MODE\n' +
                             '====================================='
                     }
                 }
