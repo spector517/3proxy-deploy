@@ -88,6 +88,16 @@ pipeline {
                 echo 'Parameters checked!'
             }
         }
+        stage('Pull required files') {
+            steps {
+                git url: 'https://github.com/spector517/antisovok-deploy.git', branch: 'main'
+            }
+            when {
+                expression {
+                    return env.BUILD_NUMBER.toInteger() > 1
+                }
+            }
+        }
         stage('Generate ansible files') {
             steps {
                 echo 'Generating vars file...'
