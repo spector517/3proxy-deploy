@@ -213,6 +213,11 @@ pipeline {
             steps {
                 archiveArtifacts '**/*.ovpn'
             }
+            when {
+                expression {
+                    return env.BUILD_NUMBER.toInteger() > 1 && !params.CHECK_MODE
+                }
+            }
         }
     }
 }
