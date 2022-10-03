@@ -6,7 +6,7 @@ pipeline {
             description: "Target server for deploy OpenVPN server"
         )
         string(
-            name: 'REMOTE_SERVER_PORT'
+            name: 'REMOTE_SERVER_PORT',
             defaultValue: '22',
             description: "Target server's ssh port"
         )
