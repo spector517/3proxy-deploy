@@ -7,7 +7,7 @@ pipeline {
         )
         string(
             name: 'REMOTE_SERVER_PORT'
-            defaultValue: '22'
+            defaultValue: '22',
             description: "Target server's ssh port"
         )
         string(
@@ -25,12 +25,12 @@ pipeline {
         )
         string(
             name: 'OPENVPN_PORT',
-            defaultValue: '3128'
+            defaultValue: '3128',
             description: "OpenVPN server port"
         )
         choice(
             name: 'OPENVPN_PROTOCOL',
-            choices: ['udp', 'tcp']
+            choices: ['udp', 'tcp'],
             description: 'OpenVPN server protocol (UDP or TCP)'
         )
         string(
