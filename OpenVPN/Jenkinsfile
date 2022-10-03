@@ -59,13 +59,13 @@ pipeline {
                         paramsString += "\t$key: $value\n"
                     }
                     echo paramsString
+                    if (params.CHECK_MODE) {
+                        echo '=====================================' +
+                            '             CHECK MODE' +
+                            '====================================='
+                    }
                 }
                 echo '---------------------------------------'
-                if (params.CHECK_MODE) {
-                    echo '=====================================' +
-                        '             CHECK MODE' +
-                        '====================================='
-                }
                 echo 'Check parameters...'
                 script {
                     if (env.BUILD_NUMBER.toInteger() == 1) {
@@ -210,7 +210,9 @@ pipeline {
             }
         }
         stage('Process results') {
-            archiveArtifacts '**/*.ovpn'
+            steps {
+                archiveArtifacts '**/*.ovpn'
+            }
         }
     }
 }
