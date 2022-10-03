@@ -1,0 +1,216 @@
+pipeline {
+    agent any
+    parameters {
+        string(
+            name: 'REMOTE_SERVER',
+            description: "Target server for deploy OpenVPN server"
+        )
+        string(
+            name: 'REMOTE_SERVER_PORT'
+            defaultValue: '22'
+            description: "Target server's ssh port"
+        )
+        string(
+            name: 'REMOTE_USER',
+            description: "Target server's root user"
+        )
+        password(
+            name: 'REMOTE_PASSWORD',
+            description: "Target server's root password"
+        )
+        booleanParam(
+            name: 'CHECK_MODE',
+            defaultValue: false,
+            description: "Run ansible playbook dry run"
+        )
+        string(
+            name: 'OPENVPN_PORT',
+            defaultValue: '3128'
+            description: "OpenVPN server port"
+        )
+        choice(
+            name: 'OPENVPN_PROTOCOL',
+            choices: ['udp', 'tcp']
+            description: 'OpenVPN server protocol (UDP or TCP)'
+        )
+        string(
+            name: 'DNS',
+            defaultValue: '1.1.1.1',
+            description: "Comma separated list of DNS used by '3Proxy'"
+        )
+        string(
+            name: 'CLIENTS',
+            description: "Comma separated list of OpenVPN servers clients names. For example, client1,client2"
+        )
+        booleanParam(
+            name: 'USE_UFW',
+            defaultValue: true,
+            description: "Use the Uncomplicated Firewall (or you may use other firewall)"
+        )
+    }
+    stages {
+        stage('Initialization') {
+            steps {
+                cleanWs()
+                echo 'Pipeline running with next parameters:'
+                script {
+                    paramsString = ''
+                    params.each { key, value ->
+                        paramsString += "\t$key: $value\n"
+                    }
+                    echo paramsString
+                }
+                echo '---------------------------------------'
+                if (params.CHECK_MODE) {
+                    echo '=====================================' +
+                        '             CHECK MODE' +
+                        '====================================='
+                }
+                echo 'Check parameters...'
+                script {
+                    if (env.BUILD_NUMBER.toInteger() == 1) {
+                        echo "First time build. Pipeline initialized. Rebuild pipeline with parameters."
+                        return
+                    }
+                    if (!params.REMOTE_SERVER) {
+                        error("Required pipeline parameter 'REMOTE_SERVER' is empty!")
+                    }
+                    if (!params.REMOTE_USER) {
+                        error("Required pipeline parameter 'REMOTE_USER' is empty!")
+                    }
+                    if (!params.REMOTE_PASSWORD) {
+                        error("Required pipeline parameter 'REMOTE_PASSWORD' is empty!")
+                    }
+                    if (!params.CLIENTS) {
+                        error("Required pipeline parameter 'CLIENTS' is empty!")
+                    }
+                }
+                echo 'Parameters checked!'
+            }
+        }
+        stage('Generate ansible files') {
+            steps {
+                echo 'Generating vars file...'
+                script {
+                    def vars = [
+                        openvpn_url: params.REMOTE_SERVER,
+                        openvpn_port: params.OPENVPN_PORT,
+                        openvpn_protocol: params.OPENVPN_PROTOCOL,
+                        openvpn_use_ufw: params.USE_UFW,
+                        openvpn_dns: params.DNS.split(',') as List,
+                        openvpn_clients: params.CLIENTS.split(',') as List,
+                        openvpn_ca_host: params.REMOTE_SERVER,
+                    ]
+                    writeYaml file: 'vars.yml', data: vars
+                    sh 'cat vars.yml'
+                }
+                echo 'Vars file generated successfully!'
+
+                echo 'Generating inventory file...'
+                script {
+                    def inventory = "$params.REMOTE_SERVER" +
+                        " ansible_user=$params.REMOTE_USER" +
+                        " ansible_password=$params.REMOTE_PASSWORD"
+                    writeFile file: 'inventory.txt', text: inventory
+                    sh 'cat inventory.txt'
+                }
+                echo 'Inventory file generated successfully!'
+
+                echo 'Generating playbook...'
+                script {
+                    def playbook = "- hosts: all\n" +
+                        "  roles:\n" +
+                        "  - role: spector517.openvpn"
+                    writeFile file: 'playbook.yml', text: playbook
+                    sh 'cat playbook.yml'
+                }
+                echo 'Playbook generated successfully!'
+            }
+            when {
+                expression {
+                    return env.BUILD_NUMBER as Integer > 1
+                }
+            }
+        }
+        stage('Deploy OpenVPN server') {
+            steps {
+                echo 'Running ansible playbook...'
+                sh 'ansible-galaxy install --force spector517.openvpn'
+                withEnv(['ANSIBLE_HOST_KEY_CHECKING=False']) {
+                    ansiblePlaybook(
+                        playbook: 'playbook.yml',
+                        inventory: 'inventory.txt',
+                        extras: "-e @vars.yml ${if (params.CHECK_MODE) '--check' else ''}"
+                    )
+                }
+                echo 'Playbook executed successfully!'
+            }
+            when {
+                expression {
+                    return env.BUILD_NUMBER.toInteger() > 1
+                }
+            }
+        }
+        stage('Run test') {
+            steps {
+                echo 'Running test...'
+                script {
+                    def remoteServerIp = (
+                        sh(
+                            script: "ping $REMOTE_SERVER -c 4",
+                            returnStdout: true
+                        ) =~ /(?<=\()[0-9\.]+(?!=\))/
+                    )[0]
+                    echo 'Find client config'
+                    clientConfig = findFiles(glob: '**/*.ovpn')[0]
+                    echo "Found client config: $clientConfig"
+                    sh 'mkdir OpenVPN/client-docker/clients'
+                    cp "$clientConfig.path OpenVPN/client-docker/clients/client.ovpn"
+                    try {
+                        echo 'Build OpenVPN client docker image'
+                        dir('OpenVPN/client-docker') {
+                            sh 'docker build --rm --tag ovpn_client .'
+                        }
+                        echo 'Run OpenVPN client docker container'
+                        sh "docker run --detach --name client" +
+                            " --volume 'OpenVPN/client-docker/clients:/etc/openvpn/clients'" + 
+                            " --cap-add=NET_ADMIN --device=/dev/net/tun" +
+                            " clientConfig"
+                        try {
+                            retry(count: 3) {
+                                attempt = 1
+                                echo "Attempt: $attempt, wait 5 second..."
+                                sleep time: 5, unit: 'SECONDS'
+                                echo 'Sending request via container'
+                                def response = sh(
+                                    script: "docker exec client curl 'https://api.ipify.org'",
+                                    returnStdout: true
+                                )
+                                if (remoteServerIp == response) {
+                                    echo 'Test passed!'
+                                } else {
+                                    attempt++
+                                    error("Response IP '$response' not equal remote server IP '$remoteServerIp'")
+                                }
+                            }
+                        } catch(Exception ex) {
+                            echo ex.getMessage()
+                            unstable(message: 'Test failed!')
+                        }
+                    } finally {
+                        sh "docker rm client --force"
+                        sh "docker rmi ovpn_client"
+                    }
+                }
+            }
+            when {
+                expression {
+                    return env.BUILD_NUMBER.toInteger() > 1 && !params.CHECK_MODE
+                }
+            }
+        }
+        stage('Process results') {
+            archiveArtifacts '**/*.ovpn'
+        }
+    }
+}
