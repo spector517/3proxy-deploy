@@ -128,7 +128,7 @@ pipeline {
             }
             when {
                 expression {
-                    return env.BUILD_NUMBER as Integer > 1
+                    return env.BUILD_NUMBER.toInteger() > 1
                 }
             }
         }
