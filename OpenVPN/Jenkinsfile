@@ -186,7 +186,7 @@ pipeline {
                         }
                         echo 'Run OpenVPN client docker container'
                         sh "sudo docker run --detach --name client" +
-                            " --volume 'OpenVPN/client-docker/clients:/etc/openvpn/clients'" + 
+                            " --volume '${pwd()}/OpenVPN/client-docker/clients:/etc/openvpn/clients'" + 
                             " --privileged" +
                             " ovpn_client"
                         echo 'Enable IPv4 forwarding'
