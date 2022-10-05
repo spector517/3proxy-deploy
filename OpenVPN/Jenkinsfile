@@ -111,6 +111,7 @@ pipeline {
                         openvpn_clients: params.CLIENTS.split(',').collect { client  ->
                             [name: client]
                         },
+                        openvpn_clients_path: 'ovpn-clients',
                         openvpn_ca_host: params.REMOTE_SERVER,
                     ]
                     writeYaml file: 'vars.yml', data: vars
