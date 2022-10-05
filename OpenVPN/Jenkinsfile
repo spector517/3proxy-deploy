@@ -215,7 +215,7 @@ pipeline {
                             unstable(message: 'Test failed!')
                         }
                     } finally {
-                        sh "rm OpenVPN/client-docker/clients"
+                        sh "rm -rf OpenVPN/client-docker/clients"
                         sh "sudo docker rm client --force"
                         sh "sudo docker rmi ovpn_client"
                     }
