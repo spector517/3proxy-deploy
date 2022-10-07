@@ -188,10 +188,10 @@ pipeline {
                         echo 'Run OpenVPN client docker container'
                         sh "sudo docker run --detach --name client" +
                             " --volume ${pwd()}/OpenVPN/client-docker/clients:/etc/openvpn/clients" + 
-                            " --privileged" +
+                            " --cap-add=NET_ADMIN --device=/dev/net/tun" +
                             " ovpn_client"
-                        echo 'Enable IPv4 forwarding'
-                        sh "sudo docker exec client sysctl -p /etc/sysctl.d/ipv4.conf"
+                        // echo 'Enable IPv4 forwarding'
+                        // sh "sudo docker exec client sysctl -p /etc/sysctl.d/ipv4.conf"
                         try {
                             retry(count: 3) {
                                 attempt = 1
