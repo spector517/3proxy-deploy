@@ -43,6 +43,11 @@ pipeline {
             description: "Comma separated list of OpenVPN servers clients names. For example, client1,client2"
         )
         booleanParam(
+            name: 'RESET_EASY_RSA',
+            defaultValue: false,
+            description: "Delete currently existing Easy RSA directory"
+        )
+        booleanParam(
             name: 'USE_UFW',
             defaultValue: true,
             description: "Use the Uncomplicated Firewall (or you may use other firewall)"
