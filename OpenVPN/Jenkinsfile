@@ -116,6 +116,7 @@ pipeline {
                         openvpn_clients: params.CLIENTS.split(',').collect { client  ->
                             [name: client]
                         },
+                        openvpn_reset_easy_rsa: params.RESET_EASY_RSA,
                         openvpn_clients_path: 'ovpn-clients',
                         openvpn_ca_host: params.REMOTE_SERVER,
                     ]
