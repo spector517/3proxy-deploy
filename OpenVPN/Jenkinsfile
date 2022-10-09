@@ -12,6 +12,7 @@ pipeline {
         )
         string(
             name: 'REMOTE_USER',
+            defaultValue: 'root',
             description: "Target server's root user"
         )
         password(
