@@ -101,14 +101,8 @@ pipeline {
                     if (!params.REMOTE_SERVER) {
                         error("Required pipeline parameter 'REMOTE_SERVER' is empty!")
                     }
-                    if (!params.REMOTE_USER) {
-                        error("Required pipeline parameter 'REMOTE_USER' is empty!")
-                    }
                     if (!params.REMOTE_PASSWORD) {
                         error("Required pipeline parameter 'REMOTE_PASSWORD' is empty!")
-                    }
-                    if (!params.CLIENTS && !(params.CLIENTS ==~ /^(\w+:\w+,?)+$/)) {
-                        error("Required pipeline parameter 'CLIENTS' is empty or incorrect")
                     }
                 }
                 echo 'Parameters checked!'
