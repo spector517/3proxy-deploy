@@ -63,6 +63,11 @@ pipeline {
             description: "Comma separated list of clients '3Proxy' server. For example, 'user1:pass1,user2:pass2'." +
                 " Allow all connections if empty"
         )
+        string(
+            name: 'BUILD_ID',
+            defaultValue: 'No ID',
+            description: "Build identifier"
+        )
     }
     stages {
         stage('Initialization') {
@@ -77,6 +82,7 @@ pipeline {
                     echo paramsString
                 }
                 echo '---------------------------------------'
+                currentBuild.displayName = "#${BUILD_NUMBER} - ${params.BUILD_ID}"
                 echo 'Check parameters...'
                 script {
                     if (env.BUILD_NUMBER.toInteger() == 1) {
