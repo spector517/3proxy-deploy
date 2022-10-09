@@ -66,6 +66,9 @@ pipeline {
                 script {
                     paramsString = ''
                     params.each { key, value ->
+                        if (key == 'REMOTE_PASSWORD') {
+                            value = '********'
+                        }
                         paramsString += "\t$key: $value\n"
                     }
                     echo paramsString
