@@ -41,7 +41,7 @@ pipeline {
         )
         string(
             name: 'CLIENTS',
-            defaultValue: client,
+            defaultValue: 'client',
             description: "Comma separated list of OpenVPN servers clients names. For example: client1,client2"
         )
         booleanParam(
