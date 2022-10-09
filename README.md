@@ -3,7 +3,6 @@
 ### Description
 Deploy tiny proxy server [3Proxy by Vladimir '3APA3A' Dubrovin](https://github.com/3proxy/3proxy) using [3Proxy Ansible Role](https://github.com/spector517/3proxy-ansible-role).
 ### Build parameters
-### Build parameters
 | Name               | Default value | Description                                                                               | Required |
 |--------------------|---------------|-------------------------------------------------------------------------------------------|----------|
 | REMOTE_SERVER      | None          | Target server for deploy "3Proxy" (DNS or IPv4) (ip or name)                              | Yes      |
