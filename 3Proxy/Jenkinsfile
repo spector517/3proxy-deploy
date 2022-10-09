@@ -40,12 +40,12 @@ pipeline {
             description: "SOCKSv4/SOCKSv5 port number of '3Proxy'"
         )
         string(
-            name: YSTEM_GROUP_ID',
+            name: 'SYSTEM_GROUP_ID',
             defaultValue: '200',
             description: "System group id on remotes"
         )
         string(
-            name: YSTEM_USER_ID',
+            name:'SYSTEM_USER_ID',
             defaultValue: '201',
             description: "System user id on remotes"
         )
