@@ -26,7 +26,7 @@ pipeline {
         )
         string(
             name: 'OPENVPN_PORT',
-            defaultValue: '3128',
+            defaultValue: '1194',
             description: "OpenVPN server port"
         )
         choice(
