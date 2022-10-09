@@ -35,7 +35,7 @@ pipeline {
             description: "HTTP-proxy port number of '3Proxy'"
         )
         string(
-            name: OCKS_PORT',
+            name: 'SOCKS_PORT',
             defaultValue: '1080',
             description: "SOCKSv4/SOCKSv5 port number of '3Proxy'"
         )
