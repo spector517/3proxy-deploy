@@ -8,16 +8,16 @@ pipeline {
         string(
             name: 'REMOTE_SERVER_PORT',
             defaultValue: '22',
-            description: "Target server's ssh port"
+            description: "Target server ssh port"
         )
         string(
             name: 'REMOTE_USER',
             defaultValue: 'root',
-            description: "Target server's root user"
+            description: "Target server root user"
         )
         password(
             name: 'REMOTE_PASSWORD',
-            description: "Target server's root password"
+            description: "Target server root password"
         )
         booleanParam(
             name: 'CHECK_MODE',
@@ -194,7 +194,7 @@ pipeline {
                     try {
                         echo 'Build OpenVPN client docker image'
                         dir('OpenVPN/client-docker') {
-                            sh 'sudo docker build --rm --tag ovpn_client .'
+                            sh udo docker build --rm --tag ovpn_client .'
                         }
                         echo 'Run OpenVPN client docker container'
                         sh "sudo docker run --detach --name client" +
@@ -205,8 +205,8 @@ pipeline {
                             retry(count: 3) {
                                 attempt = 1
                                 echo "Attempt: $attempt, wait 5 second..."
-                                sleep time: 5, unit: 'SECONDS'
-                                echo 'Sending request via container'
+                                sleep time: 5, unit: ECONDS'
+                                echo ending request via container'
                                 def response = sh(
                                     script: "sudo docker exec client curl 'https://api.ipify.org'",
                                     returnStdout: true

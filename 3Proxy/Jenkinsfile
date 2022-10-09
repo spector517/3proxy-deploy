@@ -8,16 +8,16 @@ pipeline {
         string(
             name: 'REMOTE_SERVER_PORT',
             defaultValue: '22',
-            description: "Target server's ssh port"
+            description: "Target server ssh port"
         )
         string(
             name: 'REMOTE_USER',
             defaultValue: 'root',
-            description: "Target server's root user"
+            description: "Target server root user"
         )
         password(
             name: 'REMOTE_PASSWORD',
-            description: "Target server's root password"
+            description: "Target server root password"
         )
         booleanParam(
             name: 'CHECK_MODE',
@@ -35,17 +35,17 @@ pipeline {
             description: "HTTP-proxy port number of '3Proxy'"
         )
         string(
-            name: 'SOCKS_PORT',
+            name: OCKS_PORT',
             defaultValue: '1080',
             description: "SOCKSv4/SOCKSv5 port number of '3Proxy'"
         )
         string(
-            name: 'SYSTEM_GROUP_ID',
+            name: YSTEM_GROUP_ID',
             defaultValue: '200',
             description: "System group id on remotes"
         )
         string(
-            name: 'SYSTEM_USER_ID',
+            name: YSTEM_USER_ID',
             defaultValue: '201',
             description: "System user id on remotes"
         )
