@@ -74,9 +74,9 @@ pipeline {
                             '             CHECK MODE\n' +
                             '====================================='
                     }
+                    currentBuild.displayName = "#${BUILD_NUMBER} - ${params.BUILD_ID}"
                 }
                 echo '---------------------------------------'
-                currentBuild.displayName = "#${BUILD_NUMBER} - ${params.BUILD_ID}"
                 echo 'Check parameters...'
                 script {
                     if (env.BUILD_NUMBER.toInteger() == 1) {

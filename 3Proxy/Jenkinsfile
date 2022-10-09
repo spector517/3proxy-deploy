@@ -80,9 +80,14 @@ pipeline {
                         paramsString += "\t$key: $value\n"
                     }
                     echo paramsString
+                    if (params.CHECK_MODE) {
+                        echo '=====================================\n' +
+                            '             CHECK MODE\n' +
+                            '====================================='
+                    }
+                    currentBuild.displayName = "#${BUILD_NUMBER} - ${params.BUILD_ID}"
                 }
                 echo '---------------------------------------'
-                currentBuild.displayName = "#${BUILD_NUMBER} - ${params.BUILD_ID}"
                 echo 'Check parameters...'
                 script {
                     if (env.BUILD_NUMBER.toInteger() == 1) {
