@@ -18,7 +18,7 @@ Deploy tiny proxy server [3Proxy by Vladimir '3APA3A' Dubrovin](https://github.c
 | SYSTEM_USER_ID     | 201           | System user id on remotes                                                                 | No       |
 | DNS                | 1.1.1.1       | Comma separated list of DNS used by "3Proxy". For example: 8.8.4.4,8.8.8.8                | No       |
 | USE_UFW            | Yes           | Use the Uncomplicated Firewall (or you may use other firewall)                            | No       |
-| CLIENTS            | client        | Comma separated list of clients "3Proxy" server. For example: user1:pass1,user2:pass2     | No       |
+| CLIENTS            | None          | Comma separated list of clients "3Proxy" server. For example: user1:pass1,user2:pass2     | No       |
 | BUILD_ID           | No ID         | Build identifier (technical parameter)                                                    | No       |
 **_NOTE:_**  All required parameters has no default value and required to fill out
 ### Stages
