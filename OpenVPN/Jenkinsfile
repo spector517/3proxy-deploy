@@ -194,10 +194,10 @@ pipeline {
                     try {
                         echo 'Build OpenVPN client docker image'
                         dir('OpenVPN/client-docker') {
-                            sh 'sudo docker build --rm --tag ovpn_client .'
+                            sh 'docker build --rm --tag ovpn_client .'
                         }
                         echo 'Run OpenVPN client docker container'
-                        sh "sudo docker run --detach --name client" +
+                        sh "docker run --detach --name client" +
                             " --volume ${pwd()}/OpenVPN/client-docker/clients:/etc/openvpn/clients" + 
                             " --cap-add=NET_ADMIN --device=/dev/net/tun" +
                             " ovpn_client"
@@ -208,7 +208,7 @@ pipeline {
                                 sleep time: 5, unit: 'SECONDS'
                                 echo 'Sending request via container'
                                 def response = sh(
-                                    script: "sudo docker exec client curl 'https://api.ipify.org'",
+                                    script: "docker exec client curl 'https://api.ipify.org'",
                                     returnStdout: true
                                 )
                                 if (remoteServerIp == response) {
@@ -225,8 +225,8 @@ pipeline {
                         }
                     } finally {
                         sh "rm -rf OpenVPN/client-docker/clients"
-                        sh "sudo docker rm client --force"
-                        sh "sudo docker rmi ovpn_client"
+                        sh "docker rm client --force"
+                        sh "docker rmi ovpn_client"
                     }
                 }
             }
