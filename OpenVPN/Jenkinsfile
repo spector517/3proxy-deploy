@@ -186,7 +186,7 @@ pipeline {
                         ) =~ /(?<=\()[0-9\.]+(?!=\))/
                     )[0]
                     echo "Remote server IP: $remoteServerIp"
-                    echo 'Find client config'
+                    echo 'Find first client config'
                     clientConfig = findFiles(glob: '**/*.ovpn')[0]
                     echo "Found client config: $clientConfig"
                     sh 'mkdir OpenVPN/client-docker/clients'
@@ -197,7 +197,7 @@ pipeline {
                             sh 'sudo docker build --rm --tag ovpn_client .'
                         }
                         echo 'Run OpenVPN client docker container'
-                        sh "sudo docker run --detach --name client" +
+                        sh "sudo docker run --rm --detach --name temp_client" +
                             " --volume ${pwd()}/OpenVPN/client-docker/clients:/etc/openvpn/clients" + 
                             " --cap-add=NET_ADMIN --device=/dev/net/tun" +
                             " ovpn_client"
@@ -224,8 +224,6 @@ pipeline {
                             unstable(message: 'Test failed!')
                         }
                     } finally {
-                        sh "rm -rf OpenVPN/client-docker/clients"
-                        sh "sudo docker rm client --force"
                         sh "sudo docker rmi ovpn_client"
                     }
                 }
