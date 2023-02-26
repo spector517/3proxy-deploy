@@ -100,7 +100,7 @@ pipeline {
         }
         stage('Pull required files') {
             steps {
-                git url: 'https://github.com/spector517/antisovok-deploy.git', branch: 'main'
+                git url: 'https://github.com/spector517/freedomnet-deploy.git', branch: 'main'
             }
             when {
                 expression {
