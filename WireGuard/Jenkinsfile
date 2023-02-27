@@ -1,0 +1,239 @@
+pipeline {
+    agent any
+    parameters {
+        string(
+            name: 'REMOTE_SERVER',
+            description: "Target server for deploy WireGuard server"
+        )
+        string(
+            name: 'REMOTE_SERVER_PORT',
+            defaultValue: '22',
+            description: "Target server ssh port"
+        )
+        string(
+            name: 'REMOTE_USER',
+            defaultValue: 'root',
+            description: "Target server root user"
+        )
+        password(
+            name: 'REMOTE_PASSWORD',
+            description: "Target server root password"
+        )
+        booleanParam(
+            name: 'CHECK_MODE',
+            defaultValue: false,
+            description: "Run ansible playbook dry run"
+        )
+        string(
+            name: 'WIREGUARD_PORT',
+            defaultValue: '51820',
+            description: "WireGuard server port"
+        )
+        string(
+            name: 'DNS',
+            defaultValue: '1.1.1.1',
+            description: "Comma separated list of DNS used by WireGuard server. For example: 8.8.4.4,8.8.8.8"
+        )
+        string(
+            name: 'CLIENTS',
+            defaultValue: 'client',
+            description: "Comma separated list of WireGuard servers clients names. For example: client1,client2"
+        )
+        booleanParam(
+            name: 'RESET_WIREGUARD',
+            defaultValue: false,
+            description: "Reset server and clients configuration"
+        )
+        booleanParam(
+            name: 'USE_UFW',
+            defaultValue: true,
+            description: "Use the Uncomplicated Firewall (or you may use other firewall)"
+        )
+        string(
+            name: 'BUILD_ID',
+            defaultValue: 'No ID',
+            description: "Build identifier"
+        )
+    }
+    stages {
+        stage('Initialization') {
+            steps {
+                cleanWs()
+                echo 'Pipeline running with next parameters:'
+                script {
+                    paramsString = ''
+                    params.each { key, value ->
+                        if (key == 'REMOTE_PASSWORD') {
+                            value = '********'
+                        }
+                        paramsString += "\t$key: $value\n"
+                    }
+                    echo paramsString
+                    if (params.CHECK_MODE) {
+                        echo '=====================================\n' +
+                            '             CHECK MODE\n' +
+                            '====================================='
+                    }
+                    currentBuild.displayName = "#${BUILD_NUMBER} - ${params.BUILD_ID}"
+                }
+                echo '---------------------------------------'
+                echo 'Check parameters...'
+                script {
+                    if (env.BUILD_NUMBER.toInteger() == 1) {
+                        echo "First time build. Pipeline initialized. Rebuild pipeline with parameters."
+                        return
+                    }
+                    if (!params.REMOTE_SERVER) {
+                        error("Required pipeline parameter 'REMOTE_SERVER' is empty!")
+                    }
+                    if (!params.REMOTE_PASSWORD) {
+                        error("Required pipeline parameter 'REMOTE_PASSWORD' is empty!")
+                    }
+                }
+                echo 'Parameters checked!'
+            }
+        }
+        stage('Pull required files') {
+            steps {
+                git url: 'https://github.com/spector517/freedomnet-deploy.git', branch: 'main'
+            }
+            when {
+                expression {
+                    return env.BUILD_NUMBER.toInteger() > 1
+                }
+            }
+        }
+        stage('Generate ansible files') {
+            steps {
+                echo 'Generating vars file...'
+                script {
+                    def vars = [
+                        wireguard_url: params.REMOTE_SERVER,
+                        wireguard_port: params.WIREGUARD_PORT,
+                        wireguard_use_ufw: params.USE_UFW,
+                        wireguard_dns: params.DNS.split(',') as List,
+                        wireguard_clients: params.CLIENTS.split(','),
+                        wireguard_reset: params.RESET_WIREGUARD
+                    ]
+                    writeYaml file: 'vars.yml', data: vars
+                    sh 'cat vars.yml'
+                }
+                echo 'Vars file generated successfully!'
+
+                echo 'Generating inventory file...'
+                script {
+                    def inventory = "$params.REMOTE_SERVER" +
+                        " ansible_user=$params.REMOTE_USER" +
+                        " ansible_password=$params.REMOTE_PASSWORD"
+                    writeFile file: 'inventory.txt', text: inventory
+                    sh 'cat inventory.txt'
+                }
+                echo 'Inventory file generated successfully!'
+
+                echo 'Generating playbook...'
+                script {
+                    def playbook = "- hosts: all\n" +
+                        "  roles:\n" +
+                        "  - role: spector517.wireguard"
+                    writeFile file: 'playbook.yml', text: playbook
+                    sh 'cat playbook.yml'
+                }
+                echo 'Playbook generated successfully!'
+            }
+            when {
+                expression {
+                    return env.BUILD_NUMBER.toInteger() > 1
+                }
+            }
+        }
+        stage('Deploy WireGuard server') {
+            steps {
+                echo 'Running ansible playbook...'
+                sh 'ansible-galaxy install --force spector517.wireguard'
+                withEnv(['ANSIBLE_HOST_KEY_CHECKING=False']) {
+                    ansiblePlaybook(
+                        playbook: 'playbook.yml',
+                        inventory: 'inventory.txt',
+                        extras: "-e @vars.yml ${if (params.CHECK_MODE) '--check' else ''}"
+                    )
+                }
+                echo 'Playbook executed successfully!'
+            }
+            when {
+                expression {
+                    return env.BUILD_NUMBER.toInteger() > 1
+                }
+            }
+        }
+        stage('Run test') {
+            steps {
+                echo 'Running test...'
+                script {
+                    def remoteServerIp = (
+                        sh(
+                            script: "ping $REMOTE_SERVER -c 4",
+                            returnStdout: true
+                        ) =~ /(?<=\()[0-9\.]+(?!=\))/
+                    )[0]
+                    echo "Remote server IP: $remoteServerIp"
+                    echo 'Find client config'
+                    clientConfig = findFiles(glob: '**/*.conf')[0]
+                    echo "Found client config: $clientConfig"
+                    sh 'mkdir WireGuard/client-docker/clients'
+                    sh "cp $clientConfig.path WireGuard/client-docker/clients/wg0.conf"
+                    try {
+                        echo 'Build WireGuard client docker image'
+                        dir('WireGuard/client-docker') {
+                            sh 'sudo docker build --rm --tag wg_client .'
+                        }
+                        echo 'Run WireGuard client docker container'
+                        sh "sudo docker run --detach --name temp_wg_client" +
+                            " --volume ${pwd()}/WireGuard/client-docker/clients:/etc/wireguard/clients" + 
+                            " --privileged" +
+                            " wg_client"
+                        try {
+                            retry(count: 3) {
+                                attempt = 1
+                                echo "Attempt: $attempt, wait 5 second..."
+                                sleep time: 5, unit: 'SECONDS'
+                                echo 'Sending request via container'
+                                def response = sh(
+                                    script: "sudo docker exec temp_wg_client curl 'https://api.ipify.org'",
+                                    returnStdout: true
+                                )
+                                if (remoteServerIp == response) {
+                                    echo "Response IP '$response' equal remote server IP '$remoteServerIp'"
+                                    echo 'Test passed!'
+                                } else {
+                                    attempt++
+                                    error("Response IP '$response' not equal remote server IP '$remoteServerIp'")
+                                }
+                            }
+                        } catch(Exception ex) {
+                            echo ex.getMessage()
+                            unstable(message: 'Test failed!')
+                        }
+                    } finally {
+                        sh "sudo docker rm temp_wg_client --force"
+                        sh "sudo docker rmi wg_client"
+                    }
+                }
+            }
+            when {
+                expression {
+                    return env.BUILD_NUMBER.toInteger() > 1 && !params.CHECK_MODE
+                }
+            }
+        }
+        stage('Process results') {
+            steps {
+                archiveArtifacts '**/*.conf'
+            }
+            when {
+                expression {
+                    return env.BUILD_NUMBER.toInteger() > 1 && !params.CHECK_MODE
+                }
+            }
+        }
+    }
+}
