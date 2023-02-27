@@ -237,7 +237,7 @@ pipeline {
         }
         stage('Process results') {
             steps {
-                archiveArtifacts '**/*.ovpn'
+                archiveArtifacts 'ovpn-clients/*.ovpn'
             }
             when {
                 expression {
