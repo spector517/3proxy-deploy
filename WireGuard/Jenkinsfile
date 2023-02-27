@@ -112,7 +112,7 @@ pipeline {
                         wireguard_port: params.WIREGUARD_PORT,
                         wireguard_use_ufw: params.USE_UFW,
                         wireguard_dns: params.DNS.split(',') as List,
-                        wireguard_clients: params.CLIENTS.split(','),
+                        wireguard_clients: params.CLIENTS.split(',') as List,
                         wireguard_reset: params.RESET_WIREGUARD
                     ]
                     writeYaml file: 'vars.yml', data: vars
