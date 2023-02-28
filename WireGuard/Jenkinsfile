@@ -113,7 +113,8 @@ pipeline {
                         wireguard_use_ufw: params.USE_UFW,
                         wireguard_dns: params.DNS.split(',') as List,
                         wireguard_clients: params.CLIENTS.split(',') as List,
-                        wireguard_reset: params.RESET_WIREGUARD
+                        wireguard_reset: params.RESET_WIREGUARD,
+                        wireguard_storage_path: 'wg-storage',
                     ]
                     writeYaml file: 'vars.yml', data: vars
                     sh 'cat vars.yml'
@@ -227,7 +228,7 @@ pipeline {
         }
         stage('Process results') {
             steps {
-                archiveArtifacts '**/*.conf'
+                archiveArtifacts 'wg-storage/clients/*.conf'
             }
             when {
                 expression {
