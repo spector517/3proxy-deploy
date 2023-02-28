@@ -115,6 +115,7 @@ pipeline {
                         wireguard_clients: params.CLIENTS.split(',') as List,
                         wireguard_reset: params.RESET_WIREGUARD,
                         wireguard_storage_path: 'wg-storage',
+                        wireguard_storage_server: params.REMOTE_SERVER
                     ]
                     writeYaml file: 'vars.yml', data: vars
                     sh 'cat vars.yml'
