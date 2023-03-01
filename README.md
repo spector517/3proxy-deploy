@@ -31,7 +31,7 @@ Deploy tiny proxy server [3Proxy by Vladimir '3APA3A' Dubrovin](https://github.c
 #### Deploy 3Proxy server
 1. Run Ansible playbook
 #### Run tests
-1. Get target servers ip
+1. Get target server ip
 2. Send request to https://api.ipify.org via deployed HTTP-proxy
 3. Send request to https://api.ipify.org via deployed SOCKSv5-proxy
 4. Ensure target server ip is obtained ip from requests above
@@ -68,7 +68,7 @@ The clients configs will be attached to the Jenkins build page.
 #### Deploy OpenVPN server
 1. Run Ansible playbook
 #### Run test
-1. Get target servers ip
+1. Get target server ip
 2. Find random client config file
 3. Build docker image based on Alpine Linux with OpenVPN and cURL packages
 4. Run OpenVPN with random client config file in docker container
