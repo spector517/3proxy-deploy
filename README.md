@@ -76,3 +76,43 @@ The clients configs will be attached to the Jenkins build page.
 6. Ensure target server ip is equal obtained ip from request above
 #### Process results
 1. Archive the clients configs
+## WireGuard
+### Description
+Deploy WireGuard server using [Wireguard Ansible role](https://github.com/spector517/wireguard-ansible-role) and generate clients configs.
+The clients configs will be attached to the Jenkins build page.
+### Build parameters
+| Name               | Default value | Description                                                                               | Required |
+|--------------------|---------------|-------------------------------------------------------------------------------------------|----------|
+| REMOTE_SERVER      | None          | Target server for deploy WireGuard server (DNS or IPv4)                                   | Yes      |
+| REMOTE_SERVER_PORT | 22            | Target server ssh port                                                                    | No       |
+| REMOTE_USER        | root          | Target server root user                                                                   | No       |
+| REMOTE_PASSWORD    | None          | Target server root password                                                               | Yes      |
+| CHECK_MODE         | No            | Run ansible playbook dry run (without changes on remote server)                           | No       |
+| WIREGUARD_PORT     | 51820         | WireGuard server port                                                                     | No       |
+| DNS                | 1.1.1.1       | Comma separated list of DNS used by OpenVPN server. For example: 8.8.4.4,8.8.8.8          | No       |
+| CLIENTS            | client        | Comma separated list of WireGuard servers clients names. For example: client1,client2     | No       |
+| RESET_WIREGUARD    | No            | Reset server and clients configuration (remove wg storage)                                | No       |
+| USE_UFW            | Yes           | Use the Uncomplicated Firewall (or you may use other firewall)                            | No       |
+| BUILD_ID           | No ID         | Build identifier (technical parameter)                                                    | No       |
+**_NOTE:_**  All required parameters has no default value and required to fill out
+### Stages
+#### Initialization
+1. Print the running parameters
+2. Check if parameters REMOTE_SERVER and REMOTE_PASSWORD are not empty
+#### Pull required files
+1. Clone this repository
+#### Generate ansible files
+1. Generate Ansible vars file using build parameters: REMOTE_SERVER, WIREGUARD_PORT, USE_UFW, DNS, CLIENTS, RESET_WIREGUARD, REMOTE_SERVER
+2. Generate Ansible inventory file  using build parameters: REMOTE_SERVER, REMOTE_USER, REMOTE_PASSWORD
+3. Generate Ansible playbook
+#### Deploy WireGuard server
+1. Run Ansible playbook
+#### Run test
+1. Get target server ip
+2. Find random client config file
+3. Build docker image based on Alpine Linux with WireGuard and cURL packages
+4. Run Wireguard with random client config file in docker container (in privileged mode)
+5. Send request form docker container to https://api.ipify.org and get ip
+6. Ensure target server ip is equal obtained ip from request above
+#### Process results
+1. Archive the clients configs
