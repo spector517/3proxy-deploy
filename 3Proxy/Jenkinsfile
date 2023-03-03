@@ -25,9 +25,20 @@ pipeline {
             description: "Run ansible playbook dry run"
         )
         string(
+            name: 'CLIENTS',
+            defaultValue: 'client0:qwe1',
+            description: "Comma separated list of clients '3Proxy' server. For example, 'user1:pass1,user2:pass2'." +
+                " Allow all connections if empty"
+        )
+        string(
             name: 'PROXY_VERSION', 
             defaultValue: '0.9.4',
             description: "Distrib version of the '3Proxy' proxy server"
+        )
+        string(
+            name: 'BUILD_ESSENTIAL_VERSION',
+            defaultValue: 'latest',
+            description: "Build essential apt version"
         )
         string(
             name: 'HTTP_PORT',
@@ -58,17 +69,6 @@ pipeline {
             name: 'USE_UFW',
             defaultValue: true,
             description: "Use the Uncomplicated Firewall (or you may use other firewall)"
-        )
-        string(
-            name: 'BUILD_ESSENTIAL_VERSION',
-            defaultValue: 'latest',
-            description: "Build essential apt version"
-        )
-        string(
-            name: 'CLIENTS',
-            defaultValue: 'client0:qwe1',
-            description: "Comma separated list of clients '3Proxy' server. For example, 'user1:pass1,user2:pass2'." +
-                " Allow all connections if empty"
         )
         string(
             name: 'BUILD_ID',

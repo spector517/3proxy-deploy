@@ -25,6 +25,11 @@ pipeline {
             description: "Run ansible playbook dry run"
         )
         string(
+            name: 'CLIENTS',
+            defaultValue: 'client',
+            description: "Comma separated list of WireGuard servers clients names. For example: client1,client2"
+        )
+        string(
             name: 'WIREGUARD_PORT',
             defaultValue: '51820',
             description: "WireGuard server port"
@@ -43,16 +48,6 @@ pipeline {
             name: 'DNS',
             defaultValue: '1.1.1.1',
             description: "Comma separated list of DNS used by WireGuard server. For example: 8.8.4.4,8.8.8.8"
-        )
-        string(
-            name: 'CLIENTS',
-            defaultValue: 'client',
-            description: "Comma separated list of WireGuard servers clients names. For example: client1,client2"
-        )
-        booleanParam(
-            name: 'RESET_WIREGUARD',
-            defaultValue: false,
-            description: "Reset server and clients configuration"
         )
         choice(
             name: 'RESTART_METHOD',
@@ -73,6 +68,11 @@ pipeline {
             name: 'USE_UFW',
             defaultValue: true,
             description: "Use the Uncomplicated Firewall (or you may use other firewall)"
+        )
+        booleanParam(
+            name: 'RESET_WIREGUARD',
+            defaultValue: false,
+            description: "Reset server and clients configuration"
         )
         string(
             name: 'BUILD_ID',
@@ -137,15 +137,14 @@ pipeline {
                         wireguard_port: params.WIREGUARD_PORT,
                         wireguard_network_interface: params.NETWORK_INTERFACE,
                         wireguard_network_address: NETWORK_ADDRESS,
-                        wireguard_use_ufw: params.USE_UFW,
-                        wireguard_dns: params.DNS.split(',') as List,
-                        wireguard_clients: params.CLIENTS.split(',') as List,
-                        wireguard_reset: params.RESET_WIREGUARD,
                         wireguard_apply_changes_method: params.RESTART_METHOD,
                         wireguard_package_version: params.WIREGUARD_VERSION,
+                        wireguard_clients: params.CLIENTS.split(',') as List,
+                        wireguard_dns: params.DNS.split(',') as List,
+                        wireguard_use_ufw: params.USE_UFW,
                         wireguard_storage_path: params.STORAGE_PATH,
-                        wireguard_storage_path: 'wg-storage',
-                        wireguard_storage_server: params.REMOTE_SERVER
+                        wireguard_storage_server: params.REMOTE_SERVER,
+                        wireguard_reset: params.RESET_WIREGUARD,
                     ]
                     writeYaml file: 'vars.yml', data: vars
                     sh 'cat vars.yml'

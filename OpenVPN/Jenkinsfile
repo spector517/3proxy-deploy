@@ -25,6 +25,11 @@ pipeline {
             description: "Run ansible playbook dry run"
         )
         string(
+            name: 'CLIENTS',
+            defaultValue: 'client',
+            description: "Comma separated list of OpenVPN servers clients names. For example: client1,client2"
+        )
+        string(
             name: 'OPENVPN_PORT',
             defaultValue: '1194',
             description: "OpenVPN server port"
@@ -39,20 +44,10 @@ pipeline {
             defaultValue: '1.1.1.1',
             description: "Comma separated list of DNS used by OpenVPN server. For example: 8.8.4.4,8.8.8.8"
         )
-        string(
-            name: 'CLIENTS',
-            defaultValue: 'client',
-            description: "Comma separated list of OpenVPN servers clients names. For example: client1,client2"
-        )
         booleanParam(
             name: 'USE_UFW',
             defaultValue: true,
             description: "Use the Uncomplicated Firewall (or you may use other firewall)"
-        )
-        booleanParam(
-            name: 'RESET_EASY_RSA',
-            defaultValue: false,
-            description: "Delete currently existing Easy RSA directory"
         )
         string(
             name: 'EASY_RSA_PATH',
@@ -73,6 +68,11 @@ pipeline {
             name: 'OPENVPN_VERSION',
             defaultValue: 'latest',
             description: "OpenVPN apt package version"
+        )
+        booleanParam(
+            name: 'RESET_EASY_RSA',
+            defaultValue: false,
+            description: "Delete currently existing Easy RSA directory"
         )
         string(
             name: 'BUILD_ID',
@@ -141,13 +141,13 @@ pipeline {
                         openvpn_clients: params.CLIENTS.split(',').collect { client  ->
                             [name: client]
                         },
-                        openvpn_reset_easy_rsa: params.RESET_EASY_RSA,
+                        openvpn_ca_host: params.REMOTE_SERVER,
                         openvpn_easy_rsa_path: params.EASY_RSA_PATH,
                         openvpn_clients_path: params.CLIENTS_PATH,
                         openvpn_server_cn: params.SERVER_CN,
                         openvpn_package_version: params.OPENVPN_VERSION,
+                        openvpn_reset_easy_rsa: params.RESET_EASY_RSA,
                         openvpn_easyrsa_req_cn: params.SERVER_CN,
-                        openvpn_ca_host: params.REMOTE_SERVER,
                     ]
                     writeYaml file: 'vars.yml', data: vars
                     sh 'cat vars.yml'
