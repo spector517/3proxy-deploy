@@ -25,7 +25,7 @@ pipeline {
             description: "Run ansible playbook dry run"
         )
         string(
-            name: 'VERSION', 
+            name: 'PROXY_VERSION', 
             defaultValue: '0.9.4',
             description: "Distrib version of the '3Proxy' proxy server"
         )
@@ -60,7 +60,13 @@ pipeline {
             description: "Use the Uncomplicated Firewall (or you may use other firewall)"
         )
         string(
+            name: 'BUILD_ESSENTIAL_VERSION',
+            defaultValue: 'latest',
+            description: "Build essential apt version"
+        )
+        string(
             name: 'CLIENTS',
+            defaultValue: 'client0:qwe1',
             description: "Comma separated list of clients '3Proxy' server. For example, 'user1:pass1,user2:pass2'." +
                 " Allow all connections if empty"
         )
@@ -122,13 +128,14 @@ pipeline {
                         }
                     }
                     def vars = [
-                        proxy3_version: params.VERSION,
+                        proxy3_version: params.PROXY_VERSION,
                         proxy3_http_port: params.HTTP_PORT,
                         proxy3_socks_port: params.SOCKS_PORT,
                         proxy3_system_group_id: params.SYSTEM_GROUP_ID,
                         proxy3_system_user_id: params.SYSTEM_USER_ID,
                         proxy3_dns: params.DNS.split(',') as List,
                         proxy3_use_ufw: params.USE_UFW,
+                        proxy3_build_essential_version: params.BUILD_ESSENTIAL_VERSION,
                         proxy3_clients: clients,
                     ]
                     writeYaml file: 'vars.yml', data: vars
