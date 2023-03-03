@@ -45,14 +45,34 @@ pipeline {
             description: "Comma separated list of OpenVPN servers clients names. For example: client1,client2"
         )
         booleanParam(
+            name: 'USE_UFW',
+            defaultValue: true,
+            description: "Use the Uncomplicated Firewall (or you may use other firewall)"
+        )
+        booleanParam(
             name: 'RESET_EASY_RSA',
             defaultValue: false,
             description: "Delete currently existing Easy RSA directory"
         )
-        booleanParam(
-            name: 'USE_UFW',
-            defaultValue: true,
-            description: "Use the Uncomplicated Firewall (or you may use other firewall)"
+        string(
+            name: 'EASY_RSA_PATH',
+            defaultValue: 'ovpn-easy-rsa',
+            description: "CA-storage location on CA server"
+        )
+        string(
+            name: 'CLIENTS_PATH',
+            defaultValue: 'ovpn-clients',
+            description: "Client's ovpn-configs location on localhost"
+        )
+        string(
+            name: 'SERVER_CN',
+            defaultValue: 'ovpn-server',
+            description: "Server common name"
+        )
+        string(
+            name: 'OPENVPN_VERSION',
+            defaultValue: 'latest',
+            description: "OpenVPN apt package version"
         )
         string(
             name: 'BUILD_ID',
@@ -122,7 +142,11 @@ pipeline {
                             [name: client]
                         },
                         openvpn_reset_easy_rsa: params.RESET_EASY_RSA,
-                        openvpn_clients_path: 'ovpn-clients',
+                        openvpn_easy_rsa_path: params.EASY_RSA_PATH,
+                        openvpn_clients_path: params.CLIENTS_PATH,
+                        openvpn_server_cn: params.SERVER_CN,
+                        openvpn_package_version: params.OPENVPN_VERSION,
+                        openvpn_easyrsa_req_cn: params.SERVER_CN,
                         openvpn_ca_host: params.REMOTE_SERVER,
                     ]
                     writeYaml file: 'vars.yml', data: vars
