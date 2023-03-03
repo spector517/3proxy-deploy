@@ -30,6 +30,16 @@ pipeline {
             description: "WireGuard server port"
         )
         string(
+            name: 'NETWORK_INTERFACE',
+            defaultValue: 'wg0',
+            description: "WireGuard network interface"
+        )
+        string(
+            name: 'NETWORK_ADDRESS',
+            defaultValue: '10.9.0.1/24',
+            description: 'WireGuard subnet address'
+        )
+        string(
             name: 'DNS',
             defaultValue: '1.1.1.1',
             description: "Comma separated list of DNS used by WireGuard server. For example: 8.8.4.4,8.8.8.8"
@@ -43,6 +53,21 @@ pipeline {
             name: 'RESET_WIREGUARD',
             defaultValue: false,
             description: "Reset server and clients configuration"
+        )
+        choice(
+            name: 'RESTART_METHOD',
+            defaultValue: ['restart', 'reload'],
+            description: "Method of apply server changes (restart or reload)"
+        )
+        string(
+            name: 'WIREGUARD_VERSION',
+            defaultValue: 'latest',
+            description: "Wireguard apt package version"
+        )
+        string(
+            name: 'STORAGE_PATH',
+            defaultValue: 'wg-storage',
+            description: "Path to directory containing server and clients configs (on storage server and localhost)"
         )
         booleanParam(
             name: 'USE_UFW',
@@ -110,10 +135,15 @@ pipeline {
                     def vars = [
                         wireguard_url: params.REMOTE_SERVER,
                         wireguard_port: params.WIREGUARD_PORT,
+                        wireguard_network_interface: params.NETWORK_INTERFACE,
+                        wireguard_network_address: NETWORK_ADDRESS,
                         wireguard_use_ufw: params.USE_UFW,
                         wireguard_dns: params.DNS.split(',') as List,
                         wireguard_clients: params.CLIENTS.split(',') as List,
                         wireguard_reset: params.RESET_WIREGUARD,
+                        wireguard_apply_changes_method: params.RESTART_METHOD,
+                        wireguard_package_version: params.WIREGUARD_VERSION,
+                        wireguard_storage_path: params.STORAGE_PATH,
                         wireguard_storage_path: 'wg-storage',
                         wireguard_storage_server: params.REMOTE_SERVER
                     ]
