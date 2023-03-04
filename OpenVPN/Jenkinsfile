@@ -149,7 +149,7 @@ pipeline {
                         openvpn_reset_easy_rsa: params.RESET_EASY_RSA,
                         openvpn_easyrsa_req_cn: params.SERVER_CN,
                     ]
-                    writeYaml file: 'vars.yml', data: vars
+                    writeYaml file: 'vars.yml', data: vars, overwrite: true
                     sh 'cat vars.yml'
                 }
                 echo 'Vars file generated successfully!'

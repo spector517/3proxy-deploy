@@ -146,7 +146,7 @@ pipeline {
                         wireguard_storage_server: params.REMOTE_SERVER,
                         wireguard_reset: params.RESET_WIREGUARD,
                     ]
-                    writeYaml file: 'vars.yml', data: vars
+                    writeYaml file: 'vars.yml', data: vars, overwrite: true
                     sh 'cat vars.yml'
                 }
                 echo 'Vars file generated successfully!'

@@ -138,7 +138,7 @@ pipeline {
                         proxy3_build_essential_version: params.BUILD_ESSENTIAL_VERSION,
                         proxy3_clients: clients,
                     ]
-                    writeYaml file: 'vars.yml', data: vars
+                    writeYaml file: 'vars.yml', data: vars, overwrite: true
                     sh 'cat vars.yml'
                 }
                 echo 'Vars file generated successfully!'
