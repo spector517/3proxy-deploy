@@ -25,7 +25,7 @@ Deploy tiny proxy server [3Proxy by Vladimir '3APA3A' Dubrovin](https://github.c
 #### Initialization
 1. Print the running parameters
 2. Check if parameters REMOTE_SERVER and REMOTE_PASSWORD are not empty
-#### Generate ansible files
+#### Generate Ansible files
 1. Generate Ansible vars file using build parameters: VERSION, HTTP_PORT, SOCKS_PORT, SYSTEM_GROUP_ID, SYSTEM_USER_ID, DNS, USE_UFW, CLIENTS
 2. Generate Ansible inventory file  using build parameters: REMOTE_SERVER, REMOTE_USER, REMOTE_PASSWORD
 3. Generate Ansible playbook
@@ -66,7 +66,7 @@ The clients configs will be attached to the Jenkins build page.
 2. Check if parameters REMOTE_SERVER and REMOTE_PASSWORD are not empty
 #### Pull required files
 1. Clone this repository
-#### Generate ansible files
+#### Generate Ansible files
 1. Generate Ansible vars file using build parameters: REMOTE_SERVER, OPENVPN_PORT, OPENVPN_PROTOCOL, USE_UFW, DNS, CLIENTS, RESET_EASY_RSA, REMOTE_SERVER
 2. Generate Ansible inventory file  using build parameters: REMOTE_SERVER, REMOTE_USER, REMOTE_PASSWORD
 3. Generate Ansible playbook
@@ -111,7 +111,7 @@ The clients configs will be attached to the Jenkins build page.
 2. Check if parameters REMOTE_SERVER and REMOTE_PASSWORD are not empty
 #### Pull required files
 1. Clone this repository
-#### Generate ansible files
+#### Generate Ansible files
 1. Generate Ansible vars file using build parameters: REMOTE_SERVER, WIREGUARD_PORT, USE_UFW, DNS, CLIENTS, RESET_WIREGUARD, REMOTE_SERVER
 2. Generate Ansible inventory file  using build parameters: REMOTE_SERVER, REMOTE_USER, REMOTE_PASSWORD
 3. Generate Ansible playbook

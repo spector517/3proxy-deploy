@@ -116,7 +116,7 @@ pipeline {
                 sh 'rm -f ~/.ssh/known_hosts'
             }
         }
-        stage('Generate ansible files') {
+        stage('Generate Ansible files') {
             steps {
                 echo 'Generating vars file...'
                 script {
