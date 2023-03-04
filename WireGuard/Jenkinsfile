@@ -42,7 +42,7 @@ pipeline {
         string(
             name: 'NETWORK_ADDRESS',
             defaultValue: '10.9.0.1/24',
-            description: 'WireGuard subnet address'
+            description: "WireGuard subnet address"
         )
         string(
             name: 'DNS',
