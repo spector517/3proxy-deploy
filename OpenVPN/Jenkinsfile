@@ -211,7 +211,7 @@ pipeline {
                     )[0]
                     echo "Remote server IP: $remoteServerIp"
                     echo 'Find client config'
-                    clientConfig = findFiles(glob: '**/*.ovpn')[0]
+                    clientConfig = findFiles(glob: "$params.CLIENTS_PATH/*.ovpn")[0]
                     echo "Found client config: $clientConfig"
                     sh 'mkdir -p OpenVPN/client-docker/clients'
                     sh "cp $clientConfig.path OpenVPN/client-docker/clients/client.ovpn"

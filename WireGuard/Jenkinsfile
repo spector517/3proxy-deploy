@@ -208,7 +208,7 @@ pipeline {
                     )[0]
                     echo "Remote server IP: $remoteServerIp"
                     echo 'Find client config'
-                    clientConfig = findFiles(glob: '**/*.conf')[0]
+                    clientConfig = findFiles(glob: "$STORAGE_PATH/clients/*.conf")[0]
                     echo "Found client config: $clientConfig"
                     sh 'mkdir -p WireGuard/client-docker/clients'
                     sh "cp $clientConfig.path WireGuard/client-docker/clients/wg0.conf"
