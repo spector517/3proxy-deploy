@@ -112,6 +112,8 @@ pipeline {
                     }
                 }
                 echo 'Parameters checked!'
+                echo 'Remove known hosts from agent'
+                sh 'rm -f ~/.ssh/known_hosts'
             }
         }
         stage('Generate ansible files') {
