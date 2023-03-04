@@ -136,7 +136,7 @@ pipeline {
                         wireguard_url: params.REMOTE_SERVER,
                         wireguard_port: params.WIREGUARD_PORT,
                         wireguard_network_interface: params.NETWORK_INTERFACE,
-                        wireguard_network_address: NETWORK_ADDRESS,
+                        wireguard_network_address: params.NETWORK_ADDRESS,
                         wireguard_apply_changes_method: params.RESTART_METHOD,
                         wireguard_package_version: params.WIREGUARD_VERSION,
                         wireguard_clients: params.CLIENTS.split(',') as List,
