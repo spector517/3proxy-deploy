@@ -228,7 +228,7 @@ pipeline {
                         try {
                             retry(count: 3) {
                                 attempt = 1
-                                echo "Attempt: $attempt, wait 5 second..."
+                                echo "Attempt: $attempt, wait 5 seconds..."
                                 sleep time: 5, unit: 'SECONDS'
                                 echo 'Sending request via container'
                                 def response = sh(
