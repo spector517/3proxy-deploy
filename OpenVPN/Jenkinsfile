@@ -213,7 +213,7 @@ pipeline {
                     echo 'Find client config'
                     clientConfig = findFiles(glob: '**/*.ovpn')[0]
                     echo "Found client config: $clientConfig"
-                    sh 'mkdir OpenVPN/client-docker/clients'
+                    sh 'mkdir -p OpenVPN/client-docker/clients'
                     sh "cp $clientConfig.path OpenVPN/client-docker/clients/client.ovpn"
                     try {
                         echo 'Build OpenVPN client docker image'

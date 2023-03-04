@@ -210,7 +210,7 @@ pipeline {
                     echo 'Find client config'
                     clientConfig = findFiles(glob: '**/*.conf')[0]
                     echo "Found client config: $clientConfig"
-                    sh 'mkdir WireGuard/client-docker/clients'
+                    sh 'mkdir -p WireGuard/client-docker/clients'
                     sh "cp $clientConfig.path WireGuard/client-docker/clients/wg0.conf"
                     try {
                         echo 'Build WireGuard client docker image'
