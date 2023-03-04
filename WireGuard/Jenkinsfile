@@ -51,7 +51,7 @@ pipeline {
         )
         choice(
             name: 'RESTART_METHOD',
-            defaultValue: ['restart', 'reload'],
+            choices: ['restart', 'reload'],
             description: "Method of apply server changes (restart or reload)"
         )
         string(
