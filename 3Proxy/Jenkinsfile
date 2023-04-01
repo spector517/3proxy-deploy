@@ -62,7 +62,7 @@ pipeline {
         )
         string(
             name: 'DNS',
-            defaultValue: '1.1.1.1',
+            defaultValue: '1.1.1.1,1.0.0.1',
             description: "Comma separated list of DNS used by '3Proxy'"
         )
         booleanParam(
